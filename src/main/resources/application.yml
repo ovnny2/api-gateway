@@ -1,0 +1,23 @@
+server:
+  port: 8010
+
+spring:
+  application:
+    name: api-gateway
+  profiles:
+    active: develop
+  config:
+    import: configserver:http://172.21.0.6:8888/
+    name: api-gateway
+
+  cloud:
+    gateway:
+      routes:
+        - id: auth_route
+          uri: http://172.21.0.4:8081
+          predicates:
+            - Path=/**
+        - id: notifications_route
+          uri: http://172.21.0.14:80
+          predicates:
+            - Path=/v1/notifications/**
