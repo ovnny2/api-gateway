@@ -1,0 +1,126 @@
+version: '3'
+
+services:
+  config-server:
+    image: config-server
+    container_name: config-server
+    ports:
+      - "8888:8888"
+    restart: on-failure
+    networks:
+      keycloak-network:
+        ipv4_address: 172.21.0.6
+
+  keycloak-sso:
+    image: keycloak-sso
+    container_name: keycloak-sso
+    environment:
+      - DB_VENDOR=postgres
+      - DB_ADDR=security-db
+      - DB_DATABASE=security-db
+      - DB_USER=vinicius
+      - DB_PASSWORD=123456
+    ports:
+      - "8080:8080"
+    networks:
+      keycloak-network:
+        ipv4_address: 172.21.0.2
+    depends_on:
+    - config-server
+
+  auth-server:
+    image: auth-server
+    container_name: auth-server
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://172.21.0.4:5432/auth_db
+      - SPRING_DATASOURCE_USERNAME=vinicius
+      - SPRING_DATASOURCE_PASSWORD=123456
+    ports:
+      - "8081:8081"
+    restart: on-failure
+    networks:
+      keycloak-network:
+        ipv4_address: 172.21.0.4
+    depends_on:
+      - config-server
+      - keycloak-sso
+
+  api-gateway:
+    image: api-gateway
+    container_name: api-gateway
+    ports:
+      - "8010:8010"
+    restart: on-failure
+    networks:
+      keycloak-network:
+        ipv4_address: 172.21.0.10
+    depends_on:
+      - notifications
+      - keycloak-sso
+      - auth-server
+      - config-server
+
+  notifications:
+    image: notifications
+    container_name: notifications
+    ports:
+      - "80:80"
+    restart: on-failure
+    networks:
+      keycloak-network:
+        ipv4_address: 172.21.0.14
+    depends_on:
+      - notifications-db
+      - keycloak-sso
+      - config-server
+
+  notifications-db:
+    image: notifications-db
+    container_name: notifications-db
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=root
+    ports:
+      - '27017'
+    restart: on-failure
+    networks:
+      keycloak-network:
+        ipv4_address: 172.21.0.15
+
+#  redis:
+#    image: redis/redis-stack
+#    container_name: redis-cache
+#    restart: unless-stopped
+#    ports:
+#      - "6379:6379"
+#      - "8001:8001"
+#    volumes:
+#      - /home/ovny/databases/redis/:/data
+#    networks:
+#      security-network:
+#        ipv4_address:  172.21.0.11
+#    depends_on:
+#      - config-server
+#      - api-gateway
+
+
+#  keycloak-db:
+#    image: postgres
+#    container_name: security-db
+#    environment:
+#      - POSTGRES_DB=security-db
+#      - POSTGRES_USER=vinicius
+#      - POSTGRES_PASSWORD=123456
+#      - POSTGRES_PORT=5433
+#    networks:
+#      keycloak-network:
+#        ipv4_address: 172.21.0.3
+
+volumes:
+  auth-data:
+  keycloak-data:
+  notifications-data:
+
+networks:
+  keycloak-network:
+    external: true
