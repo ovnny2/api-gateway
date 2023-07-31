@@ -28,6 +28,22 @@ services:
     depends_on:
     - config-server
 
+  notifications-db:
+    image: notifications-db
+    container_name: notifications-db
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=root
+    ports:
+      - '27017'
+    restart: on-failure
+    networks:
+      keycloak-network:
+        ipv4_address: 172.21.0.15
+    depends_on:
+      - config-server
+      - keycloak-sso
+
   auth-server:
     image: auth-server
     container_name: auth-server
@@ -44,21 +60,7 @@ services:
     depends_on:
       - config-server
       - keycloak-sso
-
-  api-gateway:
-    image: api-gateway
-    container_name: api-gateway
-    ports:
-      - "8010:8010"
-    restart: on-failure
-    networks:
-      keycloak-network:
-        ipv4_address: 172.21.0.10
-    depends_on:
-      - notifications
-      - keycloak-sso
-      - auth-server
-      - config-server
+      - notifications-db
 
   notifications:
     image: notifications
@@ -70,22 +72,26 @@ services:
       keycloak-network:
         ipv4_address: 172.21.0.14
     depends_on:
-      - notifications-db
-      - keycloak-sso
       - config-server
+      - keycloak-sso
+      - notifications-db
+      - auth-server
 
-  notifications-db:
-    image: notifications-db
-    container_name: notifications-db
-    environment:
-      - MONGO_INITDB_ROOT_USERNAME=root
-      - MONGO_INITDB_ROOT_PASSWORD=root
+  api-gateway:
+    image: api-gateway
+    container_name: api-gateway
     ports:
-      - '27017'
+      - "8010:8010"
     restart: on-failure
     networks:
       keycloak-network:
-        ipv4_address: 172.21.0.15
+        ipv4_address: 172.21.0.10
+    depends_on:
+      - config-server
+      - keycloak-sso
+      - notifications-db
+      - auth-server
+      - notifications
 
 #  redis:
 #    image: redis/redis-stack
