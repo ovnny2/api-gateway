@@ -41,8 +41,8 @@ services:
       keycloak-network:
         ipv4_address: 172.21.0.15
     depends_on:
-      - config-server
       - keycloak-sso
+      - config-server
 
   auth-server:
     image: auth-server
@@ -58,9 +58,9 @@ services:
       keycloak-network:
         ipv4_address: 172.21.0.4
     depends_on:
-      - config-server
-      - keycloak-sso
       - notifications-db
+      - keycloak-sso
+      - config-server
 
   notifications:
     image: notifications
@@ -72,10 +72,10 @@ services:
       keycloak-network:
         ipv4_address: 172.21.0.14
     depends_on:
-      - config-server
-      - keycloak-sso
-      - notifications-db
       - auth-server
+      - notifications-db
+      - keycloak-sso
+      - config-server
 
   api-gateway:
     image: api-gateway
@@ -87,11 +87,11 @@ services:
       keycloak-network:
         ipv4_address: 172.21.0.10
     depends_on:
-      - config-server
-      - keycloak-sso
-      - notifications-db
-      - auth-server
       - notifications
+      - auth-server
+      - notifications-db
+      - keycloak-sso
+      - config-server
 
 #  redis:
 #    image: redis/redis-stack
