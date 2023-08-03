@@ -12,12 +12,10 @@ spring:
 
   cloud:
     gateway:
+      default-filters:
+        - TokenRelay=
       routes:
-        - id: auth_route
-          uri: http://172.21.0.4:8081
-          predicates:
-            - Path=/**
         - id: notifications_route
           uri: http://172.21.0.14:80
           predicates:
-            - Path=/v1/notifications/**
+            - Path=/v1/notifications**
