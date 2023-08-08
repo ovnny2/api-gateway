@@ -14,6 +14,7 @@ public class SecurityConfig extends WebSecurityConfiguration {
     @Bean
     SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity http) {
         return http
+                .csrf(Customizer.withDefaults())
                 .authorizeExchange(exchange -> exchange.matchers(EndpointRequest.toAnyEndpoint()).permitAll()
                         .anyExchange().authenticated())
                 .oauth2Login(Customizer.withDefaults())
