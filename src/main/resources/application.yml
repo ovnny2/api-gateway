@@ -16,23 +16,7 @@ spring:
         - id: notifications_route
           uri: http://172.21.0.14:80
           predicates:
+            - Method=GET,POST
             - Path=/v1/notifications**
           filters:
             - TokenRelay=
-            - SaveSession
-
-        - id: authorization_route
-          uri: http://172.21.0.10:8010
-          predicates:
-            - Path=/oauth2/authorization/keycloak
-          filters:
-            - TokenRelay=
-            - SaveSession
-
-        - id: keycloak_login_route
-          uri: http://172.21.0.10:8010
-          predicates:
-            - Path=/login/oauth2/code/keycloak
-          filters:
-            - TokenRelay=
-            - SaveSession
