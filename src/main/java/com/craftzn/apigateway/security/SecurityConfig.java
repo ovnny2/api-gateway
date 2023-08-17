@@ -18,7 +18,7 @@ public class SecurityConfig {
                 .csrf(csrfSpec -> csrfSpec.csrfTokenRepository(CookieServerCsrfTokenRepository.withHttpOnlyFalse()))
 
                 .authorizeExchange((authorize) -> authorize
-                        .pathMatchers("/oauth2/authorization/**", "/error**").permitAll()
+                        .pathMatchers("/oauth2/authorization/**", "/login**","/login/oauth2/code/**" ,"/error**").permitAll()
                         .pathMatchers("/v1/notifications**").hasRole("USER")
                         .anyExchange().authenticated())
 
