@@ -1,26 +1,25 @@
 package com.craftzn.apigateway.security;
 
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfiguration;
+import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.server.SecurityWebFilterChain;
 import org.springframework.security.web.server.csrf.CookieServerCsrfTokenRepository;
 
-@EnableWebSecurity
-public class SecurityConfig extends WebSecurityConfiguration {
+@EnableWebFluxSecurity
+public class SecurityConfig {
 
     @Bean
     SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity http) {
         return http
-                .csrf().disable()
-
-                .x509(Customizer.withDefaults())
+                .csrf(csrfSpec -> csrfSpec.csrfTokenRepository(CookieServerCsrfTokenRepository.withHttpOnlyFalse()))
 
                 .authorizeExchange((authorize) -> authorize
-                        .pathMatchers("/login/**", "/error**").permitAll()
+                        .pathMatchers("/oauth2/authorization/**", "/error**").permitAll()
+                        .pathMatchers("/v1/notifications**").hasRole("USER")
                         .anyExchange().authenticated())
 
                 .oauth2Login(Customizer.withDefaults())
